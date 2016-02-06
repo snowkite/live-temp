@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta  name = "viewport" content = "initial-scale = 1.0, maximum-scale = 1.0, user-scalable = no">
+		<link rel="stylesheet" href="../../codebase/webix.css" type="text/css" media="screen" charset="utf-8">
+		<script src="../../codebase/webix.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../common/chartdata.js"></script>
+		<title>TODO supply a title</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="/javascripts/socket.io.js"></script>
+		<script>
+			var dps = []; // dataPoints
+			var dps2 = [];
+			var dps3 = [];
+			var xVal = 0;
+			var yVal = 0;
+			var yVal2 = 0;
+			var yVal3 = 0;
+			var socket = io('http://localhost:80');
+			socket.on('connect', function () {
+				//alert("Hello socket.io");
+			});
+			socket.on('msg', function (data) {
+				var msg = data.split("\t");
+				yVal = parseFloat(msg[1]);
+				yVal2 = parseFloat(msg[3]);
+				yVal3 = 33;//(parseFloat(msg[5]);
+				dps.push({
+					x: xVal,
+					y: yVal
+				});
+				dps2.push({
+					x: xVal,
+					y: yVal2
+				});
+				dps3.push({
+					x: xVal,
+					y: yVal3
+				});
+				xVal++;
+				//console.log(yVal3);
+			});
+			socket.on('disconnect', function () {});
+
+			window.onload = function () {
+
+				var chart = new CanvasJS.Chart("chartContainer", {
+					title: {
+						text: "Live temperature"
+					},
+					data: [
+						{type: "line", dataPoints: dps},
+						{type: "line", dataPoints: dps2},
+						{type: "line", dataPoints: dps3}
+					]
+			});
+				
+				var updateInterval = 100;
+				var dataLength = 100; 
+
+				var updateChart = function (count) {
+					if (dps.length > dataLength)
+					{
+						dps.shift();
+						dps2.shift();
+						dps3.shift();
+					}
+
+					chart.render();
+				};
+
+				updateChart(dataLength);
+ 
+				setInterval(function () {
+					updateChart()
+				}, updateInterval);
+
+			}
+		</script>
+		<script type="text/javascript" src="/javascripts/cjs/canvasjs.min.js"></script>
+
+		<style>
+			.my_menu .webix_view{
+			    background-color: #ECEFF1;
+			}
+			.my_menu .webix_list_item{
+			    line-height: 35px;
+			    border-bottom-color: #ddd;
+			}
+
+
+		</style>
+	</head>
+	<body>
+		<script type="text/javascript" charset="utf-8">
+			webix.ready(function () {
+				webix.ui({
+					rows: [
+						{
+							view: "toolbar", id: "toolbar", elements: [
+								{
+									view: "icon", icon: "bars",
+									click: function () {
+										if ($$("menu").config.hidden) {
+											$$("menu").show();
+										} else
+											$$("menu").hide();
+									}
+								},
+								{
+									view: "label",
+									label: "LiveTemp"
+								}
+
+							]
+						},
+						{
+							view: "template",
+							content: "chartContainer"
+						}
+					]
+				});
+
+				webix.ui({
+					view: "sidemenu",
+					id: "menu",
+					width: 200,
+					position: "left",
+					state: function (state) {
+						var toolbarHeight = $$("toolbar").$height;
+						state.top = toolbarHeight;
+						state.height -= toolbarHeight;
+					},
+					css: "my_menu",
+					body: {
+						view: "list",
+						borderless: true,
+						scroll: false,
+						template: "<span class='webix_icon fa-#icon#'></span> #value#",
+						data: [
+            width:250,
+							}},
+							{id: 1, value: "Device", icon: "cube"},
+							{id: 2, value: "Live", icon: "line-chart"},
+							{id: 3, value: "Archives", icon: "database"},
+							{id: 4, value: "Settings", icon: "cog"}
+						],
+						on:{
+					onMenuItemClick:function(id){
+						webix.message("Click: "+this.getMenuItem(id).value);
+					}
+				},
+						select: true,
+						type: {
+							height: 40
+						}
+					},
+				});
+
+			});
+
+		</script>
+		<div id="chartContainer" style="height: 500px; width:100%;"></div>
+	</body>
+</html>
