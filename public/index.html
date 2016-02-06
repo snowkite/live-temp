@@ -23,8 +23,8 @@
 			});
 			socket.on('msg', function (data) {
 				var msg = data.split("\t");
-				yVal = parseFloat(msg[1]);
-				yVal2 = parseFloat(msg[3]);
+				yVal = parseFloat(msg[3]);
+				yVal2 = parseFloat(msg[4]);
 				yVal3 = 33;//(parseFloat(msg[5]);
 				dps.push({
 					x: xVal,
